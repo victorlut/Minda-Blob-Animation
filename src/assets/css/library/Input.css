@@ -1,0 +1,16 @@
+.input-group {
+  transition: all 0.25s ease-in-out;
+}
+
+.input-group input {
+  -webkit-appearance: none;
+}
+
+.input-prepend {
+  width: 50px;
+}
+
+.validation-message {
+  padding: 3px 0;
+  min-height: 25px;
+}

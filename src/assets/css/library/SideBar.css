@@ -1,0 +1,22 @@
+.sidebar {
+  width: var(--sidebar-width);
+  box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15);
+  transition: right 0.3s ease-in;
+  transition: left 0.3s ease-in;
+}
+
+.fixed-left-dx {
+  left: 0;
+}
+
+.fixed-right-dx {
+  left: 0;
+}
+
+.sidebar-left-hidden-dx {
+  left: calc(-1 * var(--sidebar-width));
+}
+
+.sidebar-right-hidden-dx {
+  right: calc(-1 * var(--sidebar-width));
+}
