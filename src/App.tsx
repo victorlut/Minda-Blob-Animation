@@ -4,7 +4,6 @@ import React from 'react';
 import { HomePage as MindaAnimationPage } from './pages/MindaAnimation';
 
 import 'notyf/notyf.min.css';
-import './App.css';
 
 function App() {
   return (
