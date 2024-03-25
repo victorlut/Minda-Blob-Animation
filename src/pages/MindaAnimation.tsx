@@ -43,7 +43,7 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
 
     if (previousTimeRef.current != undefined) {
       // Organic movement itself
-      let { _nodes: _bigNodes, _controlPoints: _bigControlPoints } = blob.update(bigNodes, bigControlPoints, amplitude);
+      let { _nodes: _bigNodes, _controlPoints: _bigControlPoints } = blob.update(bigNodes, bigControlPoints, amplitude * 1.5);
       setBigNodes([..._bigNodes]);
       setBigControlPoints([..._bigControlPoints]);
 
