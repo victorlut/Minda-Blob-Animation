@@ -93,8 +93,11 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
                 type="rotate"
                 from={`0 ${bigOffsetX} ${bigOffsetY}`}
                 to={`360 ${bigOffsetX} ${bigOffsetY}`}
-                dur="5s"
+                dur="2s"
                 repeatCount="indefinite"
+                calcMode="spline"
+                keySplines="0.16, 0.16, 0.85, 0.82"
+                values={`0 ${bigOffsetX} ${bigOffsetY};360 ${bigOffsetX} ${bigOffsetY}`}
               />
             {/* <animateTransform attributeName="transform" attributeType="XML" type="translate" from={`0 0`} to={`-250 0`} dur="2s" style={{ animationTimingFunction: 'cubic-bezier(0.12, -0.98, 0.57, 1.58)' }} repeatCount="1" fill="freeze" /> */}
           </path>
