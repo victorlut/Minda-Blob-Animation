@@ -10,8 +10,8 @@ export interface Node {
   nextY: number;
   baseX: number;
   baseY: number;
-  wholeOrganicDistanceX: number;
-  wholeOrganicDistanceY: number;
+  wholeOrganicMoveDistanceX: number;
+  wholeOrganicMoveDistanceY: number;
   organicOffsetX: number;
   organicOffsetY: number;
   angle: number;
@@ -25,15 +25,55 @@ export interface ControlPoint {
 }
 export class BlobDrawer {
   speed: number;
+  stSpeed: number;
+  orgSpeed: number;
+  stOrgSpeed: number;
   totalNodes: number;
 
-  constructor(speed: number, totalNodes: number) {
+  constructor(speed: number, orgSpeed: number, totalNodes: number) {
     this.speed = speed;
+    this.stSpeed = speed;
+    this.orgSpeed = orgSpeed;
+    this.stOrgSpeed = orgSpeed;
     this.totalNodes = totalNodes;
   }
 
-  ease(t: number) {
-    return (-(Math.cos((Math.PI / 2) * t * 5) - 2) / 256) * this.speed;
+  ease(t: number, sp: number) {
+    return (-(Math.cos((Math.PI / 2) * t * 5) - 2) / 256) * sp;
+  }
+  startOrgSpeedEase() {
+    this.stOrgSpeed = this.orgSpeed;
+  }
+  orgSpeedEase(destSpeed: number) {
+    if (destSpeed == this.orgSpeed)
+      return true;
+    let leftSpeed = destSpeed - this.orgSpeed;
+    let wholeSpeedDist = destSpeed - this.stOrgSpeed;
+    let t = 1 - leftSpeed / wholeSpeedDist;
+
+    this.orgSpeed += this.ease(t > 0 ? t : 0.2, 1.5) * wholeSpeedDist;
+    if (leftSpeed * (destSpeed - this.orgSpeed) < 0) {
+      this.orgSpeed = destSpeed;
+      return true;
+    }
+    return false;
+  }
+  startSpeedEase() {
+    this.stSpeed = this.speed;
+  }
+  speedEase(destSpeed: number) {
+    if (destSpeed == this.speed)
+      return true;
+    let leftSpeed = destSpeed - this.speed;
+    let wholeSpeedDist = destSpeed - this.stSpeed;
+    let t = 1 - leftSpeed / wholeSpeedDist;
+
+    this.speed += this.ease(t > 0 ? t : 0.2, 1) * wholeSpeedDist;
+    if (leftSpeed * (destSpeed - this.speed) < 0) {
+      this.speed = destSpeed;
+      return true;
+    }
+    return false;
   }
   rotate(cx: number, cy: number, x: number, y: number, radians: number) {
     const cos = Math.cos(radians),
@@ -62,13 +102,13 @@ export class BlobDrawer {
         nextY: y + offsetY,
         baseX: x + offsetX,
         baseY: y + offsetY,
-        wholeOrganicDistanceX: 0,
-        wholeOrganicDistanceY: 0,
+        wholeOrganicMoveDistanceX: 0,
+        wholeOrganicMoveDistanceY: 0,
         organicOffsetX: 0,
         organicOffsetY: 0,
         angle,
         debug: {},
-      });
+      } as Node);
     }
     return nodes;
   }
@@ -136,9 +176,11 @@ export class BlobDrawer {
 
       nodes[i].nextX = x + offsetX;
       nodes[i].baseX = x + offsetX;
+      nodes[i].prevX = nodes[i].x;
 
       nodes[i].nextY = y + offsetY;
       nodes[i].baseY = y + offsetY;
+      nodes[i].prevY = nodes[i].y;
       nodes[i].angle = angle;
     });
     return {
@@ -146,25 +188,25 @@ export class BlobDrawer {
     };
   }
   updateOrganic(node: Node, amplitude: number) {
-    let leftOrganicDistanceX = node.wholeOrganicDistanceX - node.organicOffsetX;
-    let leftOrganicDistanceY = node.wholeOrganicDistanceY - node.organicOffsetY;
+    let leftOrganicDistanceX = node.wholeOrganicMoveDistanceX - node.organicOffsetX;
+    let leftOrganicDistanceY = node.wholeOrganicMoveDistanceY - node.organicOffsetY;
 
     if (leftOrganicDistanceX < 10) {
       const shiftX = ((~~(Math.random() * 5) - 2) * Math.random() * amplitude) / 2;
-      node.wholeOrganicDistanceX = shiftX - node.organicOffsetX;
-      leftOrganicDistanceX = node.wholeOrganicDistanceX - node.organicOffsetX;
+      node.wholeOrganicMoveDistanceX = shiftX - node.organicOffsetX;
+      leftOrganicDistanceX = node.wholeOrganicMoveDistanceX - node.organicOffsetX;
     }
     if (leftOrganicDistanceY < 10) {
       const shiftY = ((~~(Math.random() * 5) - 2) * Math.random() * amplitude) / 2;
-      node.wholeOrganicDistanceY = shiftY - node.organicOffsetY;
-      leftOrganicDistanceY = node.wholeOrganicDistanceY - node.organicOffsetY;
+      node.wholeOrganicMoveDistanceY = shiftY - node.organicOffsetY;
+      leftOrganicDistanceY = node.wholeOrganicMoveDistanceY - node.organicOffsetY;
     }
 
-    let tX = 1 - leftOrganicDistanceX / node.wholeOrganicDistanceX;
-    let tY = 1 - leftOrganicDistanceY / node.wholeOrganicDistanceY;
+    let tX = 1 - leftOrganicDistanceX / node.wholeOrganicMoveDistanceX;
+    let tY = 1 - leftOrganicDistanceY / node.wholeOrganicMoveDistanceY;
 
-    node.organicOffsetX += this.ease(tX > 0 ? tX : 0.2) * node.wholeOrganicDistanceX;
-    node.organicOffsetY += this.ease(tY > 0 ? tY : 0.2) * node.wholeOrganicDistanceY;
+    node.organicOffsetX += this.ease(tX > 0 ? tX : 0.2, this.orgSpeed) * node.wholeOrganicMoveDistanceX;
+    node.organicOffsetY += this.ease(tY > 0 ? tY : 0.2, this.orgSpeed) * node.wholeOrganicMoveDistanceY;
 
     return node;
   }
@@ -181,8 +223,8 @@ export class BlobDrawer {
       let tX = 1 - remainingDistanceX / distanceX;
       let tY = 1 - remainingDistanceY / distanceY;
 
-      let shiftX = this.ease(tX > 0 ? tX : 0.2) * distanceX;
-      let shiftY = this.ease(tY > 0 ? tY : 0.2) * distanceY;
+      let shiftX = this.ease(tX > 0 ? tX : 0.2, this.speed) * distanceX;
+      let shiftY = this.ease(tY > 0 ? tY : 0.2, this.speed) * distanceY;
 
       if (Math.abs(remainingDistanceX - shiftX) >= Math.abs(remainingDistanceX)) {
         shiftX = remainingDistanceX;
@@ -194,9 +236,6 @@ export class BlobDrawer {
       } else {
         moveEnd = false;
       }
-      // const shiftX = 0;
-      // const shiftY = 0;
-      // console.log({tX, x: nodes[i].x, nextX: nodes[i].nextX, y: nodes[i].y, prevX: nodes[i].prevX, distanceX, remainingDistanceX});
 
       nodes[i].x += shiftX;
       nodes[i].y += shiftY;
@@ -228,7 +267,7 @@ export class BlobDrawer {
   createBlobMergeFilter(id: string) {
     return (
       <filter id={id}>
-        <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"></feGaussianBlur>
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
         <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"></feColorMatrix>
       </filter>
     );
