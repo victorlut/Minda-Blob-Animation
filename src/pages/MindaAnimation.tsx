@@ -68,8 +68,8 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
 
   const motionSineFreq = useSpring(1);
   const motionSineOffset = useSpring(0.5);
-  const motionSineAmplitude = useSpring(1, {damping: 1});
-  const motionSineMoveSpeed = useSpring(0.1, {damping: 1});
+  const motionSineAmplitude = useSpring(1);
+  const motionSineMoveSpeed = useSpring(0.1);
 
   const idleTimerHandle = React.useRef<any>(null);
 
