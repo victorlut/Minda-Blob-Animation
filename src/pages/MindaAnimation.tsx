@@ -70,8 +70,10 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
   const motionSineOffset = useSpring(0.5);
   const motionSineAmplitude = useSpring(1);
   const motionSineMoveSpeed = useSpring(0.1);
+  const flowingWay = useSpring(1);
 
   const idleTimerHandle = React.useRef<any>(null);
+  const idleSpeakingSum = React.useRef<number>(0);
 
   const createPath = (nodesRef: React.MutableRefObject<Node[]>, controlPointsRef: React.MutableRefObject<ControlPoint[]>, rad: number, offX: number, offY: number, amp: number) => {
     // if (animationMode.current > AnimationType.START_SPEAKING_MERGE) {
@@ -125,7 +127,7 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
         },
       });
       animate(smallOffsetX, defaultSmallOffsetX, {
-        duration: 2.0,
+        duration: 1.0,
         ease: 'easeInOut',
         onComplete: () => {
           nextAnimationMode();
@@ -134,7 +136,7 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
     } else if (animationMode.current == AnimationType.START_SPEAKING_DOWN) {
       console.log('Start Speaking Collapse');
       // bigNodes.current = blob.stretchNodes(bigRadius, defaultBigOffsetX, defaultBigOffsetY, totalNodes + 5);
-      const { _nodes, _controlPoints } = blob.createEllipseNodes(bigRadius, bigRadius - 30, defaultBigOffsetX, boxHeight - 20, totalNodes + 10);
+      const { _nodes, _controlPoints } = blob.createEllipseNodes(bigRadius, bigRadius - 30, defaultBigOffsetX, defaultBigOffsetY - 50, totalNodes + 10);
       // nodesRef.current = _nodes;
       // controlPointsRef.current = _controlPoints;
       const ellipsePath = blob.drawBlobPath(_nodes, _controlPoints);
@@ -149,7 +151,7 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
             bigControlPoints.current = _controlPoints;
 
             animate(0, 1, {
-              duration: 1,
+              duration: 0.5,
               ease: "easeInOut",
               onUpdate: (_motion) => {
                 toEllipseWorker.current!.postMessage({ message: 'moment', moment: _motion });
@@ -169,7 +171,7 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
 
         // Precalculate Animation
         if (toGraphWorker.current) {
-          const { _nodes } = blob.createSineNodes(defaultBigOffsetX, boxHeight, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get());
+          const { _nodes } = blob.createSineNodes(defaultBigOffsetX, defaultBigOffsetY, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get());
 
           const sinePath = blob.drawSinePath(_nodes);
           toGraphWorker.current.postMessage({ message: 'Create Interpolate', old: ellipsePath, current: sinePath });
@@ -178,14 +180,14 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
     } else if (animationMode.current == AnimationType.ENLONGATING) {
       console.log('Start Speaking Enlongating');
       if (toGraphWorker.current) {
-        const { _nodes } = blob.createSineNodes(defaultBigOffsetX, boxHeight, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get());
+        const { _nodes } = blob.createSineNodes(defaultBigOffsetX, defaultBigOffsetY, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get());
 
         interpolating.current = true;
         toGraphWorker.current.onmessage = (event) => {
           setBigPath(event.data);
         };
         animate(0, 1, {
-          duration: 1,
+          duration: 0.5,
           ease: 'easeInOut',
           onUpdate: (_motion) => {
             toGraphWorker.current!.postMessage({ message: 'moment', moment: _motion });
@@ -212,8 +214,7 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
     }
     else if (animationMode.current == AnimationType.IDLE_BACK) {
       console.log('Backing to Idle');
-      console.log(defaultBigOffsetX, boxHeight, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get());
-      const { _nodes } = blob.createSineNodes(defaultBigOffsetX, boxHeight, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get());
+      const { _nodes } = blob.createSineNodes(defaultBigOffsetX, defaultBigOffsetY, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get());
       const sinePath = blob.drawSinePath(_nodes);
       const circleNodes = blob.createCircleNodes(bigRadius, defaultBigOffsetX, defaultBigOffsetY, totalNodes);
       const circleControlPoints = blob.createControlPoints(circleNodes, bigRadius, defaultBigOffsetX, defaultBigOffsetY);
@@ -254,7 +255,7 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
   };
 
   const processAnimationByAudio = (avg: number) => {
-    motionSineMoveSpeed.set(0.1 + avg / 16);
+    motionSineMoveSpeed.set(0.1 + avg / 32);
     motionSineAmplitude.set(1 + avg / 16);
   };
 
@@ -263,15 +264,16 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
     let _amp = motionAmplitude.get();
 
     if (animationMode.current == AnimationType.SPEAKING) {
-      const {_nodes} = blob.createSineNodes(defaultBigOffsetX, boxHeight, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get())
+      const {_nodes} = blob.createSineNodes(defaultBigOffsetX, defaultBigOffsetY, motionSineFreq.get(), motionSineOffset.get(), motionSineAmplitude.get())
       setBigPath(blob.drawSinePath(_nodes));
-      motionSineOffset.set(motionSineOffset.get() - motionSineMoveSpeed.get())
+      motionSineOffset.set(motionSineOffset.get() - motionSineMoveSpeed.get() * flowingWay.get())
 
       if (audioElement.current && !audioElement.current.paused) {
         if (idleTimerHandle.current) {
           clearTimeout(idleTimerHandle.current);
           idleTimerHandle.current = null;
         }
+        
         const audioBufferLength = audioAnalyser.current.frequencyBinCount;
         const audioDataArray = new Uint8Array(audioBufferLength);
         audioAnalyser.current.getByteTimeDomainData(audioDataArray);
@@ -280,6 +282,19 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
           sum += Math.abs(audioDataArray[i] - 128);
         }
         const avg = sum / audioBufferLength;
+
+        if (avg < 1)
+          idleSpeakingSum.current += audioBufferLength / audioContext.current.sampleRate;
+        else
+          idleSpeakingSum.current = 0;
+
+        if (idleSpeakingSum.current > 0.5) {
+          console.log("chance");
+          flowingWay.set(flowingWay.get() * -1);
+
+          idleSpeakingSum.current = 0;
+        }
+
         processAnimationByAudio(avg);
       } else {
         motionSineAmplitude.set(1);

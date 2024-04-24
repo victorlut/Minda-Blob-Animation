@@ -169,6 +169,20 @@ export class BlobDrawer {
         organicOffsetY: 0,
       } as Node);
     }
+    for (let i = centerX * 2 - 1; i >= 0 ; i--) {
+      const x = i;
+      const y = centerY + 10 - this.pathFunction(x, freq / 2, - offset / 2, amplitude / 2);
+
+      nodes.push({
+        id: i,
+        x: x,
+        y: y,
+        wholeOrganicMoveDistanceX: 0,
+        wholeOrganicMoveDistanceY: 0,
+        organicOffsetX: 0,
+        organicOffsetY: 0,
+      } as Node);
+    }
     return {
       _nodes: nodes,
       _controlPoints: [],
@@ -407,7 +421,7 @@ export class BlobDrawer {
   }
   drawSinePath(nodes: Node[]/*, controlPoints: ControlPoint[], amplitude: number = 0.5*/) {
     // this.updateOrganics(nodes, amplitude);
-    return `${nodes.map((n, i) => i == 0 ? `M ${n.x} ${n.y}` : ` L ${n.x} ${n.y}`).join('')} L ${nodes[nodes.length - 1].x} ${nodes[nodes.length - 1].y + 300} L 0 ${nodes[nodes.length - 1].y + 300} Z`;
+    return `${nodes.map((n, i) => i == 0 ? `M ${n.x} ${n.y}` : ` L ${n.x} ${n.y}`).join('')}`;
     // return `${nodes
     //   .map((n, i) =>
     //     i == 0
