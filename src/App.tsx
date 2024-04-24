@@ -3,8 +3,6 @@ import React from 'react';
 
 import { HomePage as MindaAnimationPage } from './pages/MindaAnimation';
 
-import 'notyf/notyf.min.css';
-
 function App() {
   return (
     <React.Fragment>
