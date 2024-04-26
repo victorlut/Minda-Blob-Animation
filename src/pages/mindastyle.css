@@ -3,3 +3,8 @@
   height: auto;
   box-sizing: border-box;
 }
+.svg-wrapper {
+  border: 1px solid black;
+  width: fit-content;
+  margin: 0 auto;
+}

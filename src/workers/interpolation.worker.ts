@@ -9,7 +9,6 @@ self.onmessage = (event) => {
   // Execute the corresponding function based on the received identifier
   if (message == "Create Interpolate") {
     interpolationFN = interpolate(old, current, { maxSegmentLength: 1 });
-    console.log("Create Interpolate")
     postMessage("Created Interpolate");
   } else if (message == "moment" && moment) {
     postMessage(interpolationFN(moment));

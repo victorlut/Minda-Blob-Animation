@@ -1,15 +1,7 @@
-import React from 'react';
-
 export interface Node {
   id: number;
   x: number;
   y: number;
-  prevX: number;
-  prevY: number;
-  nextX: number;
-  nextY: number;
-  baseX: number;
-  baseY: number;
   wholeOrganicMoveDistanceX: number;
   wholeOrganicMoveDistanceY: number;
   organicOffsetX: number;
@@ -17,12 +9,14 @@ export interface Node {
   angle: number;
   debug: any;
 }
+
 export interface ControlPoint {
   c1x: number;
   c1y: number;
   c2x: number;
   c2y: number;
 }
+
 export class BlobDrawer {
   speed: number;
   stSpeed: number;
@@ -38,38 +32,6 @@ export class BlobDrawer {
 
   ease(t: number, sp: number) {
     return (-(Math.cos((Math.PI / 2) * t * 5) - 2) / 256) * sp;
-  }
-  startOrgSpeedEase() {
-    this.stOrgSpeed = this.orgSpeed;
-  }
-  orgSpeedEase(destSpeed: number) {
-    if (destSpeed == this.orgSpeed) return true;
-    let leftSpeed = destSpeed - this.orgSpeed;
-    let wholeSpeedDist = destSpeed - this.stOrgSpeed;
-    let t = 1 - leftSpeed / wholeSpeedDist;
-
-    this.orgSpeed += this.ease(t > 0 ? t : 0.2, 1.5) * wholeSpeedDist;
-    if (leftSpeed * (destSpeed - this.orgSpeed) < 0) {
-      this.orgSpeed = destSpeed;
-      return true;
-    }
-    return false;
-  }
-  startSpeedEase() {
-    this.stSpeed = this.speed;
-  }
-  speedEase(destSpeed: number) {
-    if (destSpeed == this.speed) return true;
-    let leftSpeed = destSpeed - this.speed;
-    let wholeSpeedDist = destSpeed - this.stSpeed;
-    let t = 1 - leftSpeed / wholeSpeedDist;
-
-    this.speed += this.ease(t > 0 ? t : 0.2, 1) * wholeSpeedDist;
-    if (leftSpeed * (destSpeed - this.speed) < 0) {
-      this.speed = destSpeed;
-      return true;
-    }
-    return false;
   }
   rotate(cx: number, cy: number, x: number, y: number, radians: number) {
     const cos = Math.cos(radians),
@@ -92,12 +54,6 @@ export class BlobDrawer {
         id: i,
         x: x + offsetX,
         y: y + offsetY,
-        prevX: x + offsetX,
-        prevY: y + offsetY,
-        nextX: x + offsetX,
-        nextY: y + offsetY,
-        baseX: x + offsetX,
-        baseY: y + offsetY,
         wholeOrganicMoveDistanceX: 0,
         wholeOrganicMoveDistanceY: 0,
         organicOffsetX: 0,
@@ -124,12 +80,6 @@ export class BlobDrawer {
         id: i,
         x: x + offsetX,
         y: y + offsetY,
-        prevX: x + offsetX,
-        prevY: y + offsetY,
-        nextX: x + offsetX,
-        nextY: y + offsetY,
-        baseX: x + offsetX,
-        baseY: y + offsetY,
         wholeOrganicMoveDistanceX: 0,
         wholeOrganicMoveDistanceY: 0,
         organicOffsetX: 0,
@@ -143,7 +93,7 @@ export class BlobDrawer {
       _controlPoints: this.createEllipseControlPoints(nodes, radiusX, radiusY, offsetX, offsetY),
     };
   }
-  pathFunction(x: number, freq: number = 0.61, offset: number = 0, amplitude: number = 1.75) {
+  getSinePathPointByX(x: number, freq: number = 0.61, offset: number = 0, amplitude: number = 1.75) {
 		var result = 
 			
 			// Function to determine curve
@@ -152,12 +102,12 @@ export class BlobDrawer {
 		
 		return result;
 	};
-  createSineNodes(centerX: number, centerY: number, freq: number, offset: number, amplitude: number) {
+  createSineNodes(centerX: number, centerY: number, thinkness: number, freq: number, offset: number, amplitude: number) {
     const nodes = [];
 
     for (let i = 0; i < centerX * 2; i++) {
       const x = i;
-      const y = centerY - 40 + this.pathFunction(x, freq, offset, amplitude);
+      const y = centerY - thinkness / 2 + this.getSinePathPointByX(x, freq, offset, amplitude);
 
       nodes.push({
         id: i,
@@ -171,7 +121,7 @@ export class BlobDrawer {
     }
     for (let i = centerX * 2 - 1; i >= 0 ; i--) {
       const x = i;
-      const y = centerY + 10 - this.pathFunction(x, freq / 2, - offset / 2, amplitude / 2);
+      const y = centerY + thinkness / 2 - this.getSinePathPointByX(x, freq / 2, - offset / 2, amplitude / 2);
 
       nodes.push({
         id: i,
@@ -237,35 +187,6 @@ export class BlobDrawer {
       };
     });
   }
-  createSineControlPoints(nodes: Node[], cycleWidth: number, cycleHeight: number) {
-    return nodes.map((n, i) => {
-      // if (i < nodes.length / 2) {
-      const x1 = n.x + cycleWidth / 3;
-      const y1 = n.y - cycleHeight / 2;
-      const x2 = n.x + (cycleWidth / 3) * 2;
-      const y2 = n.y + cycleHeight / 2;
-
-      return {
-        c1x: x1,
-        c1y: y1,
-        c2x: x2,
-        c2y: y2,
-      };
-      // } else {
-      //   const x1 = n.x + cycleWidth / 3;
-      //   const y1 = n.y - cycleHeight / 2;
-      //   const x2 = n.x + cycleWidth / 3 * 2;
-      //   const y2 = n.y + cycleHeight / 2;
-
-      //   return {
-      //     c1x: x1,
-      //     c1y: y1,
-      //     c2x: x2,
-      //     c2y: y2,
-      //   };
-      // }
-    });
-  }
   createControlPoints(nodes: Node[], radius: number, offsetX: number, offsetY: number) {
     const idealControlPointDistance = (4 / 3) * Math.tan(Math.PI / (2 * nodes.length)) * radius;
 
@@ -305,7 +226,6 @@ export class BlobDrawer {
   }
   movePlace(nodes: Node[], radius: number, offsetX: number, offsetY: number, amplitude: number) {
     let num = nodes.length,
-      width = radius * 2,
       angle,
       x,
       y;
@@ -324,12 +244,6 @@ export class BlobDrawer {
       _nodes: nodes,
       _controlPoints: this.createControlPoints(nodes, radius, offsetX, offsetY),
     };
-  }
-  organicOffsets(nodes: Node[], amplitude: number) {
-    return nodes.map((node) => ({
-      shiftX: ((~~(Math.random() * 5) - 2) * Math.random() * amplitude) / 2,
-      shiftY: ((~~(Math.random() * 5) - 2) * Math.random() * amplitude) / 2,
-    }));
   }
   updateOrganic(node: Node, amplitude: number) {
     let leftOrganicDistanceX = node.wholeOrganicMoveDistanceX - node.organicOffsetX;
@@ -356,56 +270,9 @@ export class BlobDrawer {
   }
   updateOrganics(nodes: Node[], amplitude: number) {
     nodes.forEach((n, i) => {
-      nodes[i] = { ...this.updateOrganic(nodes[i], amplitude) };
+      nodes[i] = { ...this.updateOrganic(n, amplitude) };
     });
     return nodes;
-  }
-  updateSineOrganic(nodes: Node[], amplitude: number) {
-    nodes.forEach((n, i) => {
-      // nodes[i].x = ;
-    });
-    return nodes;
-  }
-  update(nodes: Node[], controlPoints: ControlPoint[], amplitude: number) {
-    let moveEnd = true;
-
-    nodes.forEach((n, i) => {
-      nodes[i] = { ...this.updateOrganic(nodes[i], amplitude) };
-
-      const distanceX = nodes[i].nextX - nodes[i].prevX;
-      const distanceY = nodes[i].nextY - nodes[i].prevY;
-      const remainingDistanceX = nodes[i].nextX - nodes[i].x;
-      const remainingDistanceY = nodes[i].nextY - nodes[i].y;
-      let tX = 1 - remainingDistanceX / distanceX;
-      let tY = 1 - remainingDistanceY / distanceY;
-
-      let shiftX = this.ease(tX > 0 ? tX : 0.2, this.speed) * distanceX;
-      let shiftY = this.ease(tY > 0 ? tY : 0.2, this.speed) * distanceY;
-
-      if (Math.abs(remainingDistanceX - shiftX) >= Math.abs(remainingDistanceX)) {
-        shiftX = remainingDistanceX;
-      } else {
-        moveEnd = false;
-      }
-      if (Math.abs(remainingDistanceY - shiftY) >= Math.abs(remainingDistanceY)) {
-        shiftY = remainingDistanceY;
-      } else {
-        moveEnd = false;
-      }
-
-      nodes[i].x += shiftX;
-      nodes[i].y += shiftY;
-      controlPoints[i].c1x += shiftX;
-      controlPoints[i].c1y += shiftY;
-      controlPoints[i].c2x += shiftX;
-      controlPoints[i].c2y += shiftY;
-    });
-
-    return {
-      _nodes: nodes,
-      _controlPoints: controlPoints,
-      moveEnd,
-    };
   }
 
   drawBlobPath(nodes: Node[], controlPoints: ControlPoint[]) {
@@ -419,41 +286,14 @@ export class BlobDrawer {
                 )
                 .join('')}`;
   }
-  drawSinePath(nodes: Node[]/*, controlPoints: ControlPoint[], amplitude: number = 0.5*/) {
-    // this.updateOrganics(nodes, amplitude);
+  drawSinePath(nodes: Node[]) {
     return `${nodes.map((n, i) => i == 0 ? `M ${n.x} ${n.y}` : ` L ${n.x} ${n.y}`).join('')}`;
-    // return `${nodes
-    //   .map((n, i) =>
-    //     i == 0
-    //       ? `M ${n.x} ${n.y} `
-    //       : `C ${controlPoints[i - 1].c1x + nodes[i - 1].organicOffsetX}
-    //             ${controlPoints[i - 1].c1y + nodes[i - 1].organicOffsetY},
-    //             ${controlPoints[i - 1].c2x + nodes[i].organicOffsetX} ${controlPoints[i - 1].c2y + nodes[i].organicOffsetY}, ${n.x} ${n.y} `
-    //   )
-    //   .join('')} Z`;
   }
   createBlobMergeFilter(id: string) {
     return (
       <filter id={id}>
         <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
         <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -7" result="goo"></feColorMatrix>
-      </filter>
-    );
-  }
-  createDropshadowFilter(id: string, color: string) {
-    return (
-      <filter id={id} height={'200%'} width={'200%'} x={'-30%'} y={'-30%'} overflow="visible">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="16" result="offsetblur"></feGaussianBlur>
-        <feFlood floodColor="color" floodOpacity="1"></feFlood>
-        <feComposite in2="offsetblur" operator="in"></feComposite>
-        <feOffset dx={4} dy={4} result="offsetblur"></feOffset>
-        <feComponentTransfer>
-          <feFuncA type="linear" slope={0.8}></feFuncA>
-        </feComponentTransfer>
-        <feMerge>
-          <feMergeNode></feMergeNode>
-          <feMergeNode in="SourceGraphic"></feMergeNode>
-        </feMerge>
       </filter>
     );
   }
