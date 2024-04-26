@@ -296,13 +296,28 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
     }
   };
 
-  const checkIsTalking = () => {
-    return true;
+  const checkIsTalking = (avg: number) => {
+    if (avg > 1) {
+      return true;
+    }
+
+    return false;
   }
 
   const continueAnimate = () => {
     // Change the state according to the animation
     let _amp = amplitude;
+
+    // Process Audio
+    const buff = getAudioBuffAvg();
+    
+    if (checkIsTalking(buff.avg)) {
+      if (animationMode.current == AnimationType.IDLE) {
+        nextAnimationMode();
+        animationRequestRef.current = requestAnimationFrame(continueAnimate);
+        return;
+      }
+    }
 
     if (animationMode.current == AnimationType.IDLE_BACK) {
     } else if (animationMode.current == AnimationType.START_SPEAKING_DOWN || animationMode.current == AnimationType.ENLONGATING) {
@@ -313,15 +328,13 @@ export const HomePage: React.FunctionComponent<RouteComponentProps> = (props: Ro
 
       motionSineOffset.set(motionSineOffset.get() - motionSineMoveSpeed.get() * motionSineFlowWay.get());
 
-      if (checkIsTalking()) {
+      if (checkIsTalking(buff.avg)) {
         if (idleTimerHandle.current) {
           clearTimeout(idleTimerHandle.current);
           idleTimerHandle.current = null;
         }
 
-        // Process Audio
         // If avg is below 1, change the flow direction
-        const buff = getAudioBuffAvg();
         checkAndUpdateFlowDirection(buff);
 
         // Adjust Sine Graph params based on buff data
