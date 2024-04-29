@@ -1,7 +1,7 @@
 import { Router } from '@reach/router';
 import React from 'react';
 
-import { HomePage as MindaAnimationPage } from './pages/MindaAnimation';
+import { MindaAnimationPage } from './pages/MindaAnimation';
 
 function App() {
   return (
