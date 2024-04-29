@@ -295,9 +295,9 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
     console.log(param);
     if (avg < idleVolumeLimit) idleSpeakingSum.current += audioBufferLength / audioContext.current.sampleRate;
     else if (idleSpeakingSum.current > 2) {
-        console.log('chance');
-        motionSineFlowWay.set(motionSineFlowWay.get() * -1);
-        idleSpeakingSum.current = 0;
+      console.log('chance');
+      motionSineFlowWay.set(motionSineFlowWay.get() * -1);
+      idleSpeakingSum.current = 0;
     }
 
     // if (idleSpeakingSum.current > 2 && idleSpeakingSum.current < 3) {
@@ -420,6 +420,9 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
 
   return (
     <div>
+      <button style={{ margin: '15px auto', display: 'block' }} onClick={isMute.current ? integrateSpeech : stopSpeech}>
+        {isMute.current ? 'Connect Microphone' : 'Mute Microphone'}
+      </button>
       <div className="svg-wrapper">
         <svg
           className="svg-blob-board"
@@ -439,7 +442,6 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
             </g>
           )}
         </svg>
-        <button onClick={isMute.current ? integrateSpeech : stopSpeech}>{isMute.current ? 'Connect Microphone' : 'Mute Microphone'}</button>
       </div>
     </div>
   );
