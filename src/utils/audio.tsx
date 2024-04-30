@@ -17,6 +17,7 @@ export const getAudioContext = async () => {
     
     // Connect microphone source to analyser
     source.connect(analyser);
+    // analyser.connect(audioContext.destination);
 
     // Set analyser settings
     analyser.fftSize = 4096;

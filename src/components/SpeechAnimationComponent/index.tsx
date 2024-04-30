@@ -76,7 +76,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
   const motionSineOffset = useSpring(0.5);
   const motionSineAmplitude = useSpring(1);
   const motionSineMoveSpeed = useSpring(0);
-  const motionSineThickness = useSpring(30);
+  const motionSineThickness = useSpring(40);
   const motionSineFlowWay = useSpring(1);
 
   const createPath = (
@@ -144,7 +144,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
         },
       });
       animate(smallOffsetX, defaultSmallOffsetX, {
-        duration: 0.5,
+        duration: 0.1,
         ease: 'easeInOut',
         onComplete: () => {
           nextAnimationMode();
@@ -173,7 +173,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
             bigControlPoints.current = _controlPoints;
 
             animate(0, 1, {
-              duration: 0.3,
+              duration: 0.2,
               ease: 'easeInOut',
               onUpdate: (_motion) => {
                 ellipseWorker.current!.postMessage({ message: 'moment', moment: _motion });
@@ -205,7 +205,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
           setBigObjPath(event.data);
         };
         animate(0, 1, {
-          duration: 0.4,
+          duration: 0.2,
           ease: 'easeInOut',
           onUpdate: (_motion) => {
             sineGraphWorker.current!.postMessage({ message: 'moment', moment: _motion });
@@ -243,7 +243,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
             bigControlPoints.current = circleControlPoints;
 
             animate(0, 1, {
-              duration: 1,
+              duration: 0.3,
               ease: 'easeInOut',
               onUpdate: (_motion) => {
                 ellipseWorker.current!.postMessage({ message: 'moment', moment: _motion });
@@ -282,12 +282,12 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
       sum += audioDataArray[i];
     }
 
-    return { avg: sum / audioBufferLength, audioBufferLength };
+    return { avg: Math.min(110, sum / audioBufferLength), audioBufferLength };
   };
 
   const processAnimationByAudio = (avg: number) => {
     motionSineMoveSpeed.set(0.1 + avg / 32);
-    motionSineAmplitude.set(1 + avg / 16);
+    motionSineAmplitude.set(1 + Math.sqrt(avg / 16));
   };
 
   const checkAndUpdateFlowDirection = (param: { avg: number; audioBufferLength: number }) => {
@@ -299,13 +299,6 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
       motionSineFlowWay.set(motionSineFlowWay.get() * -1);
       idleSpeakingSum.current = 0;
     }
-
-    // if (idleSpeakingSum.current > 2 && idleSpeakingSum.current < 3) {
-    //   console.log('chance');
-    //   motionSineFlowWay.set(motionSineFlowWay.get() * -1);
-
-    //   idleSpeakingSum.current = 100;
-    // }
   };
 
   const checkIsTalking = (avg: number) => {
@@ -353,7 +346,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
         processAnimationByAudio(buff.avg);
       } else {
         // Reset Sine Params
-        motionSineAmplitude.set(1);
+        // motionSineAmplitude.set(1);
         motionSineMoveSpeed.set(0.1);
         motionSineFreq.set(3);
 

@@ -107,7 +107,7 @@ export class BlobDrawer {
 
     for (let i = 0; i < centerX * 2; i++) {
       const x = i;
-      const y = centerY - thinkness / 2 + this.getSinePathPointByX(x, freq, offset, amplitude);
+      const y = centerY - thinkness / 2 + this.getSinePathPointByX(x, freq / 2, offset, amplitude / 2);
 
       nodes.push({
         id: i,
@@ -121,7 +121,7 @@ export class BlobDrawer {
     }
     for (let i = centerX * 2 - 1; i >= 0 ; i--) {
       const x = i;
-      const y = centerY + thinkness / 2 - this.getSinePathPointByX(x, freq / 2, - offset / 2, amplitude / 3);
+      const y = centerY + thinkness / 2 - this.getSinePathPointByX(x, freq / 4, - offset / 2, amplitude / 4);
 
       nodes.push({
         id: i,
