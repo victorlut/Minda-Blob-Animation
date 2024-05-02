@@ -286,7 +286,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
   };
 
   const processAnimationByAudio = (avg: number) => {
-    motionSineMoveSpeed.set(0.1 + avg / 32);
+    motionSineMoveSpeed.set(0.1 + avg / 12);
     motionSineAmplitude.set(1 + Math.sqrt(avg / 16));
     // motionSineThickness.set(40 + Math.sqrt(avg / 8))
   };
