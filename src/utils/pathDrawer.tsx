@@ -93,12 +93,12 @@ export class BlobDrawer {
       _controlPoints: this.createEllipseControlPoints(nodes, radiusX, radiusY, offsetX, offsetY),
     };
   }
-  getSinePathPointByX(x: number, freq: number = 0.61, offset: number = 0, amplitude: number = 1.75) {
+  getSinePathPointByX(x: number, freq: number = 0.61, offset: number = 0, amplitude: number = 1.75, thickness: number = 0) {
 		var result = 
 			
 			// Function to determine curve
 			// 0.2*(Math.sin(Math.sqrt(x)-$scope.offset))*x;
-			Math.sin(Math.sqrt(x * freq) / Math.PI - offset) * Math.sqrt(x) * amplitude;
+			Math.sin(Math.sqrt(x * freq) / Math.PI - offset) * (thickness ? thickness : Math.sqrt(x)) * amplitude;
 		
 		return result;
 	};
@@ -107,7 +107,7 @@ export class BlobDrawer {
 
     for (let i = 0; i < centerX * 2; i++) {
       const x = i;
-      const y = centerY - thinkness / 2 + this.getSinePathPointByX(x, freq / 2, offset, amplitude / 2);
+      const y = centerY - thinkness / 2 + this.getSinePathPointByX(x, freq / 2, offset, amplitude / 3);
 
       nodes.push({
         id: i,
@@ -121,7 +121,7 @@ export class BlobDrawer {
     }
     for (let i = centerX * 2 - 1; i >= 0 ; i--) {
       const x = i;
-      const y = centerY + thinkness / 2 - this.getSinePathPointByX(x, freq / 4, - offset / 2, amplitude / 4);
+      const y = centerY + thinkness / 2 - this.getSinePathPointByX(x, freq / 4, - offset / 2, amplitude / 5, thinkness / 3);
 
       nodes.push({
         id: i,
