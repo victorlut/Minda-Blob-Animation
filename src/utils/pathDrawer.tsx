@@ -102,12 +102,12 @@ export class BlobDrawer {
 		
 		return result;
 	};
-  createSineNodes(centerX: number, centerY: number, thinkness: number, freq: number, offset: number, amplitude: number) {
+  createSineNodes(centerX: number, centerY: number, width: number, thinkness: number, freq: number, offset: number, amplitude: number) {
     const nodes = [];
 
-    for (let i = 0; i < centerX * 2; i++) {
+    for (let i = centerX - width / 2; i < centerX + width / 2; i++) {
       const x = i;
-      const y = centerY - thinkness / 2 + this.getSinePathPointByX(x, freq / 2, offset, amplitude / 3);
+      const y = centerY - thinkness / 2 + this.getSinePathPointByX(x, freq, offset, amplitude / 3);
 
       nodes.push({
         id: i,
@@ -119,9 +119,9 @@ export class BlobDrawer {
         organicOffsetY: 0,
       } as Node);
     }
-    for (let i = centerX * 2 - 1; i >= 0 ; i--) {
+    for (let i = centerX + width / 2 - 1; i >= centerX - width / 2 ; i--) {
       const x = i;
-      const y = centerY + thinkness / 2 - this.getSinePathPointByX(x, freq / 4, - offset / 2, amplitude / 5, thinkness / 3);
+      const y = centerY + thinkness / 2 + this.getSinePathPointByX(x, freq, offset / 2, amplitude / 8);
 
       nodes.push({
         id: i,

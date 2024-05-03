@@ -13,6 +13,7 @@ const viewportWidth = 520;
 const viewportHeight = 400;
 const svgWidth = 520;
 const svgHeight = 400;
+const sineWidth = 220;
 const amplitudeFactor = 1.5;
 const centerX = viewportWidth / 2;
 const centerY = viewportHeight / 2;
@@ -72,7 +73,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
   // Motion Variables
   const motionOrgSpeed = useMotionValue(orgSpeed);
 
-  const motionSineFreq = useSpring(3);
+  const motionSineFreq = useSpring(10);
   const motionSineOffset = useSpring(0.5);
   const motionSineAmplitude = useSpring(1);
   const motionSineMoveSpeed = useSpring(0);
@@ -107,6 +108,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
     const { _nodes } = blob.createSineNodes(
       defaultBigOffsetX,
       defaultBigOffsetY,
+      sineWidth,
       motionSineThickness.get(),
       motionSineFreq.get(),
       motionSineOffset.get(),
@@ -349,7 +351,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
         // Reset Sine Params
         // motionSineAmplitude.set(1);
         motionSineMoveSpeed.set(0.1);
-        motionSineFreq.set(3);
+        // motionSineFreq.set(3);
 
         if (!idleTimerHandle.current) {
           // Idle back if Idle Waiting Time is over
