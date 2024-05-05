@@ -73,11 +73,11 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
   // Motion Variables
   const motionOrgSpeed = useMotionValue(orgSpeed);
 
-  const motionSineFreq = useSpring(10);
+  const motionSineFreq = useSpring(15);
   const motionSineOffset = useSpring(0.5);
   const motionSineAmplitude = useSpring(1);
   const motionSineMoveSpeed = useSpring(0);
-  const motionSineThickness = useSpring(40);
+  const motionSineThickness = useSpring(30);
   const motionSineFlowWay = useSpring(1);
 
   const createPath = (
@@ -284,13 +284,15 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
       sum += audioDataArray[i];
     }
 
+
     return { avg: Math.min(110, sum / audioBufferLength), audioBufferLength };
   };
 
   const processAnimationByAudio = (avg: number) => {
-    motionSineMoveSpeed.set(0.1 + avg / 12);
-    motionSineAmplitude.set(1 + Math.sqrt(avg / 16));
-    // motionSineThickness.set(40 + Math.sqrt(avg / 8))
+    console.log(avg)
+    motionSineMoveSpeed.set(0.1 + avg / 24);
+    motionSineAmplitude.set(1 + Math.sqrt(avg / 32));
+    motionSineThickness.set(30 + Math.sqrt(avg / 8))
   };
 
   const checkAndUpdateFlowDirection = (param: { avg: number; audioBufferLength: number }) => {
