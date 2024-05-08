@@ -77,7 +77,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
   const motionSineOffset = useSpring(0.5);
   const motionSineAmplitude = useSpring(1);
   const motionSineMoveSpeed = useSpring(0);
-  const motionSineThickness = useSpring(30);
+  const motionSineThickness = useSpring(20);
   const motionSineFlowWay = useSpring(1);
 
   const createPath = (
@@ -292,7 +292,7 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
     console.log(avg)
     motionSineMoveSpeed.set(0.1 + avg / 24);
     motionSineAmplitude.set(1 + Math.sqrt(avg / 32));
-    motionSineThickness.set(30 + Math.sqrt(avg / 8))
+    motionSineThickness.set(25 + Math.sqrt(avg))
   };
 
   const checkAndUpdateFlowDirection = (param: { avg: number; audioBufferLength: number }) => {
@@ -431,8 +431,13 @@ export const SpeechAnimationComponent: React.FunctionComponent<SpeechAnimationPr
           filter="url(#blob-merge)"
         >
           {blob.createBlobMergeFilter('blob-merge')}
+          <defs>
+            <clipPath id="cut-off-bottom">
+              <rect x={defaultBigOffsetX - sineWidth / 2 + 10} y={defaultBigOffsetY - bigRadius} width={sineWidth - 20} height={bigRadius * 2 + 50} />
+            </clipPath>
+          </defs>
           <g opacity={0.9}>
-            <motion.path fill="#000" d={bigObjPath}></motion.path>
+            <motion.path fill="#000" d={bigObjPath} clip-path="url(#cut-off-bottom)"></motion.path>
           </g>
           {animationMode.current <= AnimationType.START_SPEAKING_MERGE && (
             <g opacity={0.9}>
